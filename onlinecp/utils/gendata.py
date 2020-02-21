@@ -101,7 +101,7 @@ def generateGMM(d=10, k=10, n=1000, std_mean=1, concentration_wishart=30, concen
     clf = mixture.GaussianMixture(n_components=k, covariance_type='diag')
     clf.means_ = mu
     clf. covariances_ = Sigma
-    clf.precisions_cholesky_ = mixture.gaussian_mixture._compute_precision_cholesky(
+    clf.precisions_cholesky_ = mixture._gaussian_mixture._compute_precision_cholesky(
         Sigma, clf.covariance_type)
     clf.weights_ = weights
     X, label = clf.sample(n_samples=n)
