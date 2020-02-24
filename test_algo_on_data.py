@@ -146,9 +146,8 @@ if __name__ == '__main__':
 
     # display perf
     EDD, FA, ND = ev.compute_curves(ground_truth, detection_stat, num_points=30, start_coeff=1.05, end_coeff=1.2)
-    EDDth, FAth, NDth = ev.compute_curves(ground_truth, detection_stat, num_points=1,
+    EDDth, FAth, NDth = ev.compute_curves(ground_truth, detection_stat, num_points=30,
                                           thres_values=online_th, start_coeff=1, end_coeff=1)
-
     npz_filename = args.outfile
     np.savez(npz_filename,
              detection_stat=detection_stat, online_th=online_th, ground_truth=ground_truth,
