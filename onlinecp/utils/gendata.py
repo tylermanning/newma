@@ -118,6 +118,12 @@ def generateGMM(d=10, k=10, n=1000, std_mean=1, concentration_wishart=30, concen
 
 
 def stream_GMM(d=10, k=10, n=1000, nb_change=50, std_mean=0.2, concentration_wishart=30, concentration_dirichlet=5):
+    if nb_change == 0:
+        GM = generateGMM(d=d, k=k, n=5*n, std_mean=std_mean, concentration_wishart=concentration_wishart,
+                         concentration_dirichlet=concentration_dirichlet)
+        ground_truth = np.zeros(10*n)
+        return GM['data'], ground_truth
+
     X = np.zeros((n*(nb_change), d))
     ground_truth = np.zeros(n*(nb_change))
     for i in range(nb_change):

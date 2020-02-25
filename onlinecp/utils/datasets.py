@@ -61,7 +61,7 @@ def pw_linear(n_samples=200, n_features=1, n_bkps=3, noise_std=None):
     """
 
     covar = normal(size=(n_samples, n_features))
-    linear_coeff, bkps = pw_constant(n_samples=n_samples,
+    linear_coeff, bkps, _ = pw_constant(n_samples=n_samples,
                                      n_bkps=n_bkps,
                                      n_features=n_features,
                                      noise_std=None)
