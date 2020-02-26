@@ -72,6 +72,10 @@ class Experiment:
         fig.add_trace(go.Scatter(x=[i for i in range(self.signal.shape[0])], y=[i[0] for i in self.statistic],
                                  mode='lines',
                                  name=f'{self.algo} statistic'))
+        fig.update_layout(title=f'{self.algo} statistic over time',
+                          xaxis_title="Time",
+                          yaxis_title="Statistic",
+                          )
         fig.show()
 
     def plot_stat_distribution(self):

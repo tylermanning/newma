@@ -422,6 +422,14 @@ class ScanB(OnlineCP):
     
 #%% additional utils
 
+class KCUSUM(OnlineCP):
+    def __init__(self):
+        pass
+
+    def update_stat(self, new_sample):
+        pass
+
+
 def compute_adapt_threshold(stat, thresholding_quantile=0.95, adapt_forget_factor=0.05):
     """
     Compute adaptive threshold from a detection statistic, based on the assumption that its square is approx Gaussian
