@@ -10,11 +10,11 @@ import onlinecp.utils.gendata as gd
 
 
 class Experiment:
-    def __init__(self, X, algo, thresholds):
+    def __init__(self, X, algo, thresholds=None):
         self.signal = X
         self.algo = algo
         self.thresholds = thresholds
-        self.statistic = None
+        self.statistics = None
         self.ttfa = None
 
     def get_config(self):
@@ -62,14 +62,25 @@ class Experiment:
         elif self.algo == 'kcusum':
             pass
         detector.apply_to_data(self.signal)
-        self.statistic = detector.stat_stored
+        self.statistics = detector.stat_stored
 
-    def set_ttfa(self):
-        self.ttfa = [np.where(self.statistic >= threshold)[0].min() for threshold in self.thresholds]
+    def set_thresholds(self, thresholds):
+        self.thresholds = thresholds
+
+    def set_ttfa(self, buffer):
+        algo_statistic = np.array([i[0] for i in self.statistics])[buffer:]
+        ttfa = []
+        for threshold in self.thresholds:
+            cross_indices = np.where(algo_statistic >= threshold)[0]
+            if cross_indices.shape[0] > 0:
+                ttfa.append(cross_indices.min())
+            else:
+                ttfa.append(None)
+        self.ttfa = ttfa
 
     def plot_stat_time_series(self):
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=[i for i in range(self.signal.shape[0])], y=[i[0] for i in self.statistic],
+        fig.add_trace(go.Scatter(x=[i for i in range(self.signal.shape[0])], y=[i[0] for i in self.statistics],
                                  mode='lines',
                                  name=f'{self.algo} statistic'))
         fig.update_layout(title=f'{self.algo} statistic over time',
@@ -80,5 +91,5 @@ class Experiment:
 
     def plot_stat_distribution(self):
         fig = go.Figure()
-        fig = go.Figure(data=[go.Histogram(x=[i[0] for i in self.statistic])])
+        fig = go.Figure(data=[go.Histogram(x=[i[0] for i in self.statistics])])
         fig.show()
