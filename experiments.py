@@ -83,6 +83,9 @@ class Experiment:
         fig.add_trace(go.Scatter(x=[i for i in range(self.signal.shape[0])], y=[i[0] for i in self.statistics],
                                  mode='lines',
                                  name=f'{self.algo} statistic'))
+        fig.add_trace(go.Scatter(x=[i for i in range(self.signal.shape[0])], y=[i[1] for i in self.statistics],
+                                 mode='lines',
+                                 name=f'{self.algo} adaptive threshold'))
         fig.update_layout(title=f'{self.algo} statistic over time',
                           xaxis_title="Time",
                           yaxis_title="Statistic",
