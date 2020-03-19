@@ -16,6 +16,10 @@ class Experiment:
         self.thresholds = thresholds
         self.statistics = None
         self.ttfa = None
+        self.buffer = None
+        self.num_points = None
+        self.start_coeff = None
+        self.end_coeff = None
 
     def get_config(self):
         # common config
@@ -66,6 +70,12 @@ class Experiment:
 
     def set_thresholds(self, thresholds):
         self.thresholds = thresholds
+
+    def set_evaluation_settings(self, buffer, num_points, start_coeff, end_coeff):
+        self.buffer = buffer
+        self.num_points = num_points
+        self.start_coeff = start_coeff
+        self.end_coeff = end_coeff
 
     def set_ttfa(self, buffer):
         algo_statistic = np.array([i[0] for i in self.statistics])[buffer:]
