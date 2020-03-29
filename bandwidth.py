@@ -3,6 +3,7 @@ import numpy as np
 
 
 import onlinecp.utils.feature_functions as feat
+from sklearn.metrics.pairwise import euclidean_distances
 
 
 class Bandwidth:
@@ -15,18 +16,18 @@ class Bandwidth:
         self.X = X
         self.Y = Y
 
-    def set_bandwidth(self, method='median'):
+    def set_bandwidth(self, data, method='median'):
         # Median trick
         if method == 'median':
             if data is None:
-                raise Exception("You chose median for sigma in generate_frequencies, but you didn't pass any data")
+                raise Exception(
+                    "You chose median for sigma in generate_frequencies, but you didn't pass any data")
             distances = euclidean_distances(data, data)
             squared_distances = distances.flatten() ** 2
             sigmasq = np.median(squared_distances)
             self.bandwidth = np.sqrt(sigmasq)
-    
+
     def get_guassian_kernel(self):
-        if not (X or Y):
+        if not (self.X or self.Y):
             print("Need to set X & Y to run calculation")
         feat.gauss_kernel(self.X, self.Y, self.bandwidth)
-    

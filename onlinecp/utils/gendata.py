@@ -10,7 +10,6 @@ import numpy as np
 from scipy.io import wavfile, loadmat
 import scipy.signal as sig
 from sklearn import mixture
-import sphfile
 
 
 def gmdraw(weights, mu, Sigma, n):
@@ -135,48 +134,3 @@ def stream_GMM(d=10, k=10, n=1000, nb_change=50, std_mean=0.2, concentration_wis
     return X, ground_truth
 
 
-def import_vad_data(root_path='/', nb_change=300, interval_speech=10, fs=16000, SNR_convex_coeff=1):
-    noise_paths = glob.glob(root_path + 'QUT-NOISE/*_convert.wav', recursive=True)#[:2]
-    speech_paths = glob.glob(root_path + 'TIMIT/**/*.WAV', recursive=True)
-    perm_speech = np.random.permutation(len(speech_paths))
-
-    nb_change_per_noise_file = int(nb_change/len(noise_paths))
-    length_noise = fs*nb_change_per_noise_file*interval_speech
-
-    X_tot = np.empty(0)
-    gt_tot = np.empty(0)
-    for noise_file in noise_paths:
-
-        print(noise_file)
-        # noise
-        data = wavfile.read(noise_file)[1]
-        rand_start = int(np.random.rand(1)*(len(data)-length_noise))
-        data = data[rand_start:rand_start+length_noise].astype('float64')
-        data *= (1-SNR_convex_coeff)/np.max(np.abs(data))
-
-        # fill speech
-        start_ind = np.zeros(nb_change_per_noise_file, dtype=np.int)
-        ind = 0
-        for speech_ind in range(nb_change_per_noise_file):
-            start_ind[ind] = fs*interval_speech*speech_ind
-            sph = sphfile.SPHFile(speech_paths[perm_speech[speech_ind]])
-            sph.open()
-            speech_data = sph.content.astype('float64')
-            speech_data *= SNR_convex_coeff/np.max(np.abs(speech_data))
-            data[start_ind[ind]:start_ind[ind]+len(speech_data)] += speech_data
-            ind += 1
-        data /= np.max(np.abs(data))
-
-        # stft
-        X = np.abs(sig.stft(data)[2].T)
-        print(X.shape)
-        X_tot = np.vstack((X_tot, X)) if X_tot.size else X
-
-        # ground_truth
-        n = X.shape[0]
-        gt = np.zeros(n, dtype=np.bool)
-        gt[0] = True
-        gt[np.ceil(start_ind.astype(np.float64)*n/length_noise).astype(np.int)] = True
-        gt_tot = np.concatenate((gt_tot, gt))
-
-    return X_tot, gt_tot
