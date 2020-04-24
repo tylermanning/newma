@@ -98,7 +98,7 @@ def compute_curves(ground_truth, dist,
     FAs = np.zeros(num_points)
     NDs = np.zeros(num_points)
     for i in range(num_points):
-        print('Evaluate performance', i, '/', num_points)
+        print('Evaluate performance', i+1, '/', num_points)
         flagged_points = dist > thres_levels[i] * thres_values + thres_offset
         res = evaluate_detection(ground_truth, flagged_points)
         EDDs[i] = res['EDD']

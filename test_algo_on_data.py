@@ -101,44 +101,6 @@ if __name__ == '__main__':
         detector = algos.NEWMA(X[0], forget_factor=big_Lambda, forget_factor2=small_lambda, feat_func=feat_func,
                                adapt_forget_factor=thres_ff)
         detector.apply_to_data(X)
-    else:  # newmaOPU
-        pass
-        # print('Start algo ', algo, '...')
-        # m_OPU = 34570
-        # m = m_OPU
-        # print('# RF: ', m)
-        # try:
-        #     from lightonml.encoding.base import BinaryThresholdEncoder
-        #     from lightonopu.opu import OPU
-        # except ImportError:
-        #     raise Exception("Please get in touch to use LightOn OPU.")
-        #
-        # opu = OPU(n_components=m)
-        # opu.open()
-        # n_levels = 38
-        # Xencode = np.empty((X.shape[0], n_levels * X.shape[1]), dtype='uint8')
-        # t = time.time()
-        # mi, Ma = np.min(X), np.max(X)  # rescale to 0 255
-        # X = 255 * ((X - mi) / (Ma - mi))
-        # X = X.astype('uint8')
-        #
-        # for i in range(n_levels):
-        #     Xencode[:, i * X.shape[1]:(i + 1) * X.shape[1]] = X > 65 + i * 5
-        # del X
-        #
-        # start = time.time()
-        # X = opu.transform(Xencode)
-        # print('Projections took:', time.time()-start)
-        # del Xencode
-        # opu.device.close()
-        #
-        # # convert to float online to avoid memory error
-        # mult = 1.5
-        # detector = algos.NEWMA(X[0], forget_factor=big_Lambda,
-        #                        feat_func=lambda x: x.astype('float32'),
-        #                        forget_factor2=small_lambda, adapt_forget_factor=thres_ff*mult,
-        #                        thresholding_quantile=0.95, dist_func=lambda z1, z2: np.linalg.norm(z1 - z2))
-        # detector.apply_to_data(X)
 
     # compute performance metrics
     detection_stat = np.array([i[0] for i in detector.stat_stored])[int(10 * n):]  # padding
