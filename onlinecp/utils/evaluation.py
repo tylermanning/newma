@@ -27,7 +27,8 @@ def evaluate_detection(ground_truth, flagged):
         print('error', n, flagged.shape[0])
     # change flagged into change point, going from 0 to 1
     cp = np.zeros(n, dtype=bool)
-    for i in range(n-1):
+    for i in range(n - 1):
+        # consecutive flags are disregarded and only 1 is kept
         if not flagged[i] and flagged[i + 1]:
             cp[i] = 1
 
@@ -35,24 +36,39 @@ def evaluate_detection(ground_truth, flagged):
     num_change = int(ground_truth.sum())
     where_change = np.concatenate((np.argwhere(ground_truth).flatten(), np.array([n])))
 
+    total_delays, total_undetected = 0, 0
+    ttfas = []
+
     for i in range(num_change):
         begin_ind = where_change[i]
         end_ind = where_change[i + 1]
         middle_ind = int((begin_ind + end_ind) / 2)
-        # EDD
-        i = begin_ind
-        while i <= middle_ind and not cp[i]:
-            i = i+1
-        if cp[i]:
-            EDD += i - begin_ind
+        j = begin_ind
+        while j <= middle_ind and not cp[j]:
+            j = j + 1
+        if cp[j]:
+            delay = j - begin_ind
+            total_delays += j - begin_ind
         else:
+            total_undetected += 1
             not_detected += 1
-        # FA
+        false_alarms = cp[middle_ind:end_ind].sum()
+        if false_alarms > 0:
+            ttfa = np.where(cp[middle_ind:end_ind])[0][0]
+            ttfas.append(ttfa)
+
         FA += cp[middle_ind:end_ind].sum()
 
-    results = {'EDD': EDD / np.max((num_change - not_detected, 1)),
-               'not_detected': 100 * not_detected / num_change,
-               'false_alarm': FA / num_change, 'cp': cp}
+    results = {'num_changes': num_change,
+               'EDD': total_delays / np.max((num_change - not_detected, 1)),
+               '%_missed': 100 * not_detected / num_change,
+               'total_missed': total_undetected,
+               'total_false_alarms': FA,
+               'false_alarm_rate': FA / num_change,
+               'ttfas': ttfas,
+               'avg_ttfa': sum(ttfas) / max(len(ttfas), 1),
+               'cp': cp}
+    print(results)
     return results
 
 
@@ -102,8 +118,8 @@ def compute_curves(ground_truth, dist,
         flagged_points = dist > thres_levels[i] * thres_values + thres_offset
         res = evaluate_detection(ground_truth, flagged_points)
         EDDs[i] = res['EDD']
-        FAs[i] = res['false_alarm']
-        NDs[i] = res['not_detected']
+        FAs[i] = res['false_alarm_rate']
+        NDs[i] = res['%_missed']
     return EDDs, FAs, NDs
 
 
