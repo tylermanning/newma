@@ -94,11 +94,12 @@ class Experiment:
         self.end_coeff = end_coeff
 
     def get_performance_metrics(self, detection_stat, online_th, ground_truth):
-        EDD, FA, ND = ev.compute_curves(ground_truth, detection_stat, num_points=self.num_points,
+        EDD, FA, ND, results = ev.compute_curves(ground_truth, detection_stat, num_points=self.num_points,
                                         start_coeff=self.start_coeff, end_coeff=self.end_coeff)
-        EDDth, FAth, NDth = ev.compute_curves(ground_truth, detection_stat, num_points=self.num_points,
+        EDDth, FAth, NDth, results_thres = ev.compute_curves(ground_truth, detection_stat, num_points=self.num_points,
                                               thres_values=online_th, start_coeff=1, end_coeff=1)
-        return {'EDD': EDD, 'FA': FA, 'ND': ND, 'EDDth': EDDth, 'FAth': FAth, 'NDth': NDth}
+        return {'EDD': EDD, 'FA': FA, 'ND': ND, 'EDDth': EDDth, 'FAth': FAth, 'NDth': NDth,
+                'results': results, 'results_threshold': results_thres}
 
     def get_results(self, padding=3, num_points=30, start_coeff=1.05, end_coeff=1.2):
         stat, adaptive_th, ground_truth = self.get_stats(padding)
