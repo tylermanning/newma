@@ -68,7 +68,6 @@ def evaluate_detection(ground_truth, flagged):
                'ttfas': ttfas,
                'avg_ttfa': sum(ttfas) / max(len(ttfas), 1),
                'cp': cp}
-    print(results)
     return results
 
 
@@ -113,14 +112,16 @@ def compute_curves(ground_truth, dist,
     EDDs = np.zeros(num_points)
     FAs = np.zeros(num_points)
     NDs = np.zeros(num_points)
+    results = []
     for i in range(num_points):
         print('Evaluate performance', i+1, '/', num_points)
         flagged_points = dist > thres_levels[i] * thres_values + thres_offset
         res = evaluate_detection(ground_truth, flagged_points)
+        results.append(res)
         EDDs[i] = res['EDD']
         FAs[i] = res['false_alarm_rate']
         NDs[i] = res['%_missed']
-    return EDDs, FAs, NDs
+    return EDDs, FAs, NDs, results
 
 
 def plot_metrics(edd, fa, md):

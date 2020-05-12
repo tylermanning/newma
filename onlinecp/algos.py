@@ -423,11 +423,25 @@ class ScanB(OnlineCP):
 #%% additional utils
 
 class KCUSUM(OnlineCP):
-    def __init__(self):
-        pass
+    def __init__(self, reference, slack):
+        super().__init__()
+        self.ref = reference
+        self.slack = slack
+        self.even = True
 
     def update_stat(self, new_sample):
-        pass
+        if self.even:
+            x0 = self.signal[i - 1]
+            x1 = self.signal[i]
+            y0 = self.reference[i - 1]
+            y1 = self.reference[i]
+            mmd_term = get_update(gaussian_kernel, x0, x1, y0, y1)
+            self.mmd_terms.append(mmd_term)
+            update = mmd_term - self.slack
+            self.even = False
+        else:
+            update = 0
+        self.kcusum_stat = max(0, self.kcusum_stat + update)
 
 
 def compute_adapt_threshold(stat, thresholding_quantile=0.95, adapt_forget_factor=0.05):
