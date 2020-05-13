@@ -8,9 +8,12 @@ from abc import ABC, abstractmethod
 from collections import deque
 
 import numpy as np
+import random
 from scipy.stats import norm
 from scipy import linalg
 from scipy import optimize as opt
+
+from onlinecp.utils.mmd import rbf_mmd2_streaming
 
 
 class OnlineCP(ABC):
@@ -419,30 +422,51 @@ class ScanB(OnlineCP):
         self.Y.append(sample)
 
         return self.kernel_sum_XX.sum() / self.N + self.kernel_sum_YY - 2 * self.kernel_sum_XY.sum() / self.N
-    
-#%% additional utils
+
 
 class KCUSUM(OnlineCP):
-    def __init__(self, reference, slack):
-        super().__init__()
+    def __init__(self,
+                 reference, 
+                 bandwidth,
+                 slack,
+                 thresholding_method='adapt',
+                 thresholding_quantile=0.95,
+                 fixed_threshold=None,
+                 adapt_forget_factor=0.05,
+                 store_values=True
+                 ):
+        super().__init__(thresholding_method=thresholding_method,
+                         thresholding_quantile=thresholding_quantile,
+                         fixed_threshold=fixed_threshold,
+                         adapt_forget_factor=adapt_forget_factor,
+                         store_values=store_values)
         self.ref = reference
+        self.sigma = bandwidth
         self.slack = slack
-        self.even = True
+        self.even = False
+        self.kcusum_stat = 0
+        self.prev_sample = None
+        self.data = []
 
     def update_stat(self, new_sample):
+        self.data.append(new_sample)
         if self.even:
-            x0 = self.signal[i - 1]
-            x1 = self.signal[i]
-            y0 = self.reference[i - 1]
-            y1 = self.reference[i]
-            mmd_term = get_update(gaussian_kernel, x0, x1, y0, y1)
-            self.mmd_terms.append(mmd_term)
+            x0 = self.prev_sample
+            x1 = new_sample
+            y0 = self.ref.pop(random.randrange(len(self.ref)))
+            y1 = self.ref.pop(random.randrange(len(self.ref)))
+            mmd_term = rbf_mmd2_streaming(np.array((x0, x1)), np.array((y0, y1)), self.sigma)
             update = mmd_term - self.slack
             self.even = False
         else:
             update = 0
+            self.prev_sample = new_sample
+            self.even = True
         self.kcusum_stat = max(0, self.kcusum_stat + update)
+        return self.kcusum_stat
 
+
+# %% additional utils
 
 def compute_adapt_threshold(stat, thresholding_quantile=0.95, adapt_forget_factor=0.05):
     """
